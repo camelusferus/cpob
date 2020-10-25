@@ -1,0 +1,6 @@
+.venv
+.idea
+*.pyc
+config.ini
+activated_users.txt
+blocked_targets.txt

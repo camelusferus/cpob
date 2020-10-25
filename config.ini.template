@@ -1,0 +1,81 @@
+; Copyright 2020 Nils Trampel
+;
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+;
+;     http://www.apache.org/licenses/LICENSE-2.0
+;
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+
+[Main]
+
+; Interface on which the clients of the quarantine net reaches the gateway
+quarantine_interface = eth1
+
+; Subnet of IP assigned to devices in quarantine, as well as your ip / gateway of the subnet
+quarantine_subnet = 10.128.0.0/24
+quarantine_ip  = 10.128.0.254
+
+; Interface which can access for configuring, devide multiple by a space
+; Be aware that both cfg_int ans cfg_nets stand in an AND relationship for access
+config_interface = eth0
+
+; Addresses or subnets which can access for configuring, devide multiple by a space
+; Be aware that both cfg_int ans cfg_nets stand in an AND relationship for access
+config_subnets = 10.1.2.3 10.1.2.4/30
+
+; Server which is running the portal software
+portal_server = 1.2.3.4
+
+; Sites (IP addresses of the server) so important, accessible even when blocked
+important_sites = 1.2.3.4 1.2.3.5 1.2.3.6 9.8.7.6
+
+; Sites (IP addresses of the server) from your net accessible when activated
+internal_sites = 1.2.3.4 1.2.3.5 1.2.3.6 1.2.3.7
+
+; Your public IP space, in CIDR blocks, which to access should be blocked from devices inside quarantine
+public_space = 1.2.3.0/24 1.2.4.0/23
+
+; Ports to which access is allowed from quarantine
+; DEVIDED by comma
+allowed_ports = 80,443
+
+; Ports open for configuration
+; Remember to include the xmlrpc api port
+config_ports = 22,2000
+
+; allow access to quarantine_portal from the configuration devices by ICMP
+; e.g. for black box monitoring
+config_icmp = yes
+
+; DNS server to relay all clients
+; if set all DNS traffic (even if sent to other servers) will be sent to the following one
+; this will reduce the risk of circumvention of tunneling trough dns
+dns_server = 1.1.1.1
+
+; Encryption key for encrypting the mac, comment out if encryption is not wanted
+mac_encryption_key = REPLACE_WITH_SECURE_KEY
+
+; Bogon networks to which access from quarantine will be additionally blocked
+bogon_nets =  0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.0.0.0/24 192.0.2.0/24 192.88.99.0/24 192.168.0.0/16 198.18.0.0/15 198.51.100.0/24 203.0.113.0/24 224.0.0.0/3
+
+[http_redirector]
+
+; URL to redirect with attached MAC address at the end
+portal_url_template = https://www.my-network.de/quarantine/?mac=
+
+[xml_api]
+
+; TCP port to run the api on
+port = 2000
+
+; File for saving blocked targets
+blocked_targets_file = blocked_targets.txt
+
+; File for user activations
+file_users = activated_users.txt
