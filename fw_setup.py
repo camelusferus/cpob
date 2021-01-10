@@ -5,7 +5,7 @@
 # file: fw_setup.py
 # |-- a configuration generator for iptables/ipset firewalls
 #
-# Copyright 2020 Nils Trampel
+# Copyright 2020-2021 Nils Trampel
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,7 +49,9 @@ if config['Main']['bogon_nets']:
 blocked_targets = open(config['xml_api']['blocked_targets_file'],"r")
 ipset_config += "create blocked_targets hash:ip\n"
 for target in blocked_targets.readlines():
-	ipset_config += "add blocked_targets " + target
+	line = "add blocked_targets " + target
+	if line not in ipset_config:
+		ipset_config += line
 
 
 ## ipset of quarantine devices mac address with enabled internet access
@@ -57,7 +59,9 @@ ipset_config += "create activated_quarantine_macs hash:mac\n"
 activations = open(config['xml_api']['activated_macs_file'],"r")
 for user in activations.readlines():
 	if int(user.split()[1]) > int(time.time()):
-		ipset_config += "add activated_quarantine_macs " + user.split()[0] + "\n"
+		line = "add activated_quarantine_macs " + user.split()[0] + "\n"
+		if line not in ipset_config:
+			ipset_config += line
 
 ## ipset of importent sites accessible without activation
 if config['Main']['important_sites']:
@@ -117,6 +121,7 @@ if not len(config['Main']['config_interface'].split()):
 	if config['Main'].getboolean('config_icmp'):
 		iptables_config += "-A INPUT -p icmp -m set --match-set config_access src -j ACCEPT\n"
 iptables_config += "-A INPUT -i " + config['Main']['quarantine_interface'] + " -p tcp --dport 80 -j ACCEPT\n"
+iptables_config += "-A INPUT -i " + config['Main']['quarantine_interface'] + " -p udp --dport 67 -j ACCEPT\n"
 iptables_config += "-A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT\n"
 iptables_config += "-A FORWARD -m state --state INVALID -j DROP\n"
 iptables_config += "-A FORWARD ! -i " + config['Main']['quarantine_interface'] + " -j DROP\n"

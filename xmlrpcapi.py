@@ -46,7 +46,7 @@ with SimpleXMLRPCServer(('0.0.0.0', int(config['xml_api']['port'])),
     def add_time_restricted_access(mac_address, minutes):
         end_time = int(time.time()) + int(minutes) * 60
         file_object = open(config['xml_api']['activated_macs_file'], 'a')
-        file_object.write(mac_address + " " + str(end_time) + "\n")
+        file_object.write(str(mac_address) + " " + str(end_time) + "\n")
         file_object.close()
         return True
     server.register_function(add_time_restricted_access,'activate')
@@ -56,7 +56,7 @@ with SimpleXMLRPCServer(('0.0.0.0', int(config['xml_api']['port'])),
         file_object = open(config['xml_api']['activated_macs_file'], 'w')
         file_object.close()
         return True
-    server.register_function(clear_activated_users(),'clear_activations')
+    server.register_function(clear_activated_users,'clear_activations')
 
     # Renew blocked ips
     def set_blocked_targets(addresses):
