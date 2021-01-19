@@ -79,3 +79,11 @@ blocked_targets_file = blocked_targets.txt
 
 ; File for user activations
 file_users = activated_users.txt
+
+# runner of the http_redirector
+[uwsgi]
+
+http = 0.0.0.0:80
+module = http_redirector:app
+processes = 2
+master = 1

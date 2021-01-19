@@ -1,3 +1,5 @@
 ipaddress
 configparser
 pyAesCrypt
+flask
+uwsgi

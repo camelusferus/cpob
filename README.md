@@ -14,9 +14,12 @@ a linux server with
 - python3 with the ``requirements.txt`` installed
 - DHCP server running, handing out addresses from a RFC1918 pool
 
-### Remarks
+### Usage
+- both the firewall setup and the API server are simple python script which can be run
+- the http redirection is done using the _flask_ framework, so it needs an WSGI server
 
+### Remarks
 - There is no captive portal provided by the software, as you might want to have specific information for the user as well as some corporate design in it. You need to provide it and integrate it with the API so your users will be blocked or activated.
 - The firewall script is destructive to the iptables firewall as well as ipset definitions each time it is running.
-- Run a periodic script (either by the API or locally, e.g. cron), so users with expired entitlements will be blocked
+- Run the firewall setup script periodically (either by the API or locally, e.g. cron), so users with expired entitlements will be blocked
 - No support for IPv6 (yet)

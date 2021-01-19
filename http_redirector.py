@@ -26,45 +26,32 @@ import pyAesCrypt
 import io
 import base64
 import urllib
+from flask import Flask, request,redirect,abort
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
+app = Flask(__name__)
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-
-class Redirect(BaseHTTPRequestHandler):
-    def do_GET(self):
-        try:
-            request_ip = self.client_address[0]
-            p1 = subprocess.Popen(["ip", "-4", "n"], stdout=subprocess.PIPE)
-            p2 = subprocess.Popen(["grep", request_ip + " "], stdin=p1.stdout, stdout=subprocess.PIPE)
-            p1.stdout.close()
-            neighbor_reply = p2.communicate()[0]
-            neighbor_state = neighbor_reply.split()[3]
-            if neighbor_state != b'lladdr':
-                raise Exception("No layer2_connectivity for getting the MAC address")
-            request_mac = neighbor_reply.split()[4]
-            if config.has_option('Main', 'mac_encryption_key'):
-                password = config['Main']['mac_encryption_key']
-                crypto_in = io.BytesIO(request_mac)
-                crypto_out = io.BytesIO()
-                pyAesCrypt.encryptStream(crypto_in, crypto_out, password, 65536)
-                self.send_response(302)
-                self.send_header('Location', config['http_redirector']['portal_url_template'] + urllib.parse.quote(
-                    base64.b64encode(crypto_out.getvalue()), safe=''))
-            else:
-                self.send_response(302)
-                self.send_header('Location', config['http_redirector']['portal_url_template'] + request_mac)
-            self.end_headers()
-        except:
-            self.send_response(500)
-
-    def do_POST(self):
-        self.do_GET()
-
-    def do_HEAD(self):
-        self.do_GET()
-
-
-HTTPServer(("", 80), Redirect).serve_forever()
+@app.route("/<path:name>", methods=['GET', 'POST'])
+def redirect_to_captive_portal(name):
+    try:
+        request_ip = request.remote_addr
+        p1 = subprocess.Popen(["ip", "-4", "n"], stdout=subprocess.PIPE)
+        p2 = subprocess.Popen(["grep", request_ip + " "], stdin=p1.stdout, stdout=subprocess.PIPE)
+        p1.stdout.close()
+        neighbor_reply = p2.communicate()[0]
+        neighbor_state = neighbor_reply.split()[3]
+        if neighbor_state != b'lladdr':
+            raise Exception("No layer2_connectivity for getting the MAC address")
+        request_mac = neighbor_reply.split()[4]
+        if config.has_option('Main', 'mac_encryption_key'):
+            password = config['Main']['mac_encryption_key']
+            crypto_in = io.BytesIO(request_mac)
+            crypto_out = io.BytesIO()
+            pyAesCrypt.encryptStream(crypto_in, crypto_out, password, 65536)
+            return redirect(config['http_redirector']['portal_url_template'] + urllib.parse.quote(
+                base64.b64encode(crypto_out.getvalue())), code=302)
+        return redirect(config['http_redirector']['portal_url_template'] + request_mac, code=302)
+    except:
+       abort(500)
