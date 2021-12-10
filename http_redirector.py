@@ -33,6 +33,7 @@ app = Flask(__name__)
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+@app.route("/", methods=['GET','POST'])
 @app.route("/<path:name>", methods=['GET', 'POST'])
 def redirect_to_captive_portal(name):
     try:
